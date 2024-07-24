@@ -4,7 +4,7 @@ namespace EmployeeList.DataProvider;
 
 public class JsonDataProvider : IRepository<Employee>, IDisposable
 {
-    public List<Employee> Employees = new();
+    public Dictionary<int, Employee> Employees = new();
 
     private readonly string _filePath;
     
@@ -14,33 +14,22 @@ public class JsonDataProvider : IRepository<Employee>, IDisposable
         // TODO load here
     }
 
-    public IEnumerable<Employee> GetAll()
-    {
-        throw new NotImplementedException();
-    }
+    public IEnumerable<Employee> GetAll() => Employees.Values;
 
-    public Employee Get(int id)
-    {
-        throw new NotImplementedException();
-    }
+    public Employee? Get(int id) => Employees.FirstOrDefault(x => x.Value.Id == id).Value;
 
-    public Employee Update(int id, Employee item)
-    {
-        throw new NotImplementedException();
-    }
+    public Employee Update(int id, Employee item) => Employees[id] = item;
 
-    public Employee Delete(int id)
-    {
-        throw new NotImplementedException();
-    }
+    public bool Delete(int id) => Employees.Remove(id);
 
-    public Employee Add(Employee item)
+    public void Add(Employee item)
     {
-        throw new NotImplementedException();
+        int newId = Employees.Keys.Max() + 1;
+        Employees.Add(newId, item);
     }
 
     public void Dispose()
     {
-        
+        // TODO make a save theres
     }
 }
