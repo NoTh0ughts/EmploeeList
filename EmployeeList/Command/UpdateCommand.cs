@@ -18,8 +18,8 @@ public class UpdateCommand : BaseCommand
 
     public string[] ChangesList = { };
 
-    private readonly IEmployeePropertyChanger _propertyChanger = new ReflectionPropertyChanger();
-    
+    public IEmployeePropertyChanger PropertyChanger { get; set; } = new ReflectionPropertyChanger();
+
     /// <summary>
     /// Обновляет данные о сотруднике по переданным данным
     /// </summary>
@@ -36,8 +36,28 @@ public class UpdateCommand : BaseCommand
             Console.WriteLine($"Error: Employee with Id {Id} not found.");
             return false;
         }
-        return _propertyChanger.Update(employee, changesConverted);
+        
+        // Сохранение исходного состояния сотрудника
+        var originalEmployee = new Employee
+        {
+            Id = employee.Id,
+            FirstName = employee.FirstName,
+            LastName = employee.LastName,
+            SalaryPerHour = employee.SalaryPerHour
+        };
+        
+        var updateSuccess = PropertyChanger.Update(employee, changesConverted);
+        
+        // Восстановление исходного состояния сотрудника при ошибке
+        if (false == updateSuccess)
+        {
+            _repository.Update(employee.Id, originalEmployee);
+            return false;
+        }
+
+        return true;
     }
+    
 
     public UpdateCommand(IRepository<Employee> repository) : base(repository) { }
 }
