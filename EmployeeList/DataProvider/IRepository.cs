@@ -1,10 +1,16 @@
 ﻿namespace EmployeeList.DataProvider;
 
-public interface IRepository<T>
+/// <summary>
+/// Интерфейс взаимодействия с источником данных о сотрудниках
+/// Содержит основные CRUD операции
+/// </summary>
+/// <typeparam name="T">Тип оперируемых данных</typeparam>
+public interface IRepository<T> : IDisposable
 {
-    public IEnumerable<T> GetAll();
-    public T Get   (int id);
-    public T Update(int id, T item);
-    public T Delete(int id);
-    public T Add   (T item);
+    public IEnumerable<T> GetAll(int chunkSize = 50);
+    public T? Get   (int id);
+    public bool Update(int id, T item);
+    public bool Delete(int id);
+    public T Add(T item);
+    public void Commit();
 }
