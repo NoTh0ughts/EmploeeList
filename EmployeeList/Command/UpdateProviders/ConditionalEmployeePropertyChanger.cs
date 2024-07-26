@@ -23,37 +23,38 @@ public class ConditionalEmployeePropertyChanger : IEmployeePropertyChanger
     /// <returns>Обновлена ли запись</returns>
     public bool Update(Employee employee, IEnumerable<IEmployeePropertyChanger.PropertyChanges> changes)
     {
-        var updatedFields = new Dictionary<string, bool>();
+        var updatedFields = new List<string>();
         
-        foreach (var propertyChanges in changes)
+        foreach (var (property, value) in changes)
         {
-            if (propertyChanges.Property == nameof(Employee.Id))
+            if (property == nameof(Employee.Id))
             {
                 Console.WriteLine("Error: Cannot update Id property.");
                 return false;
             }
 
-            if (updatedFields.ContainsKey(propertyChanges.Property))
+            if (updatedFields.Contains(property))
             {
-                Console.WriteLine($"Property {propertyChanges.Property} already assigned, value is not changed.");
+                Console.WriteLine($"Property {property} already assigned, value is not changed.");
                 continue;
             }
 
-            switch (propertyChanges.Property)
+            switch (property)
             {
                 case nameof(Employee.FirstName):
-                    employee.FirstName = propertyChanges.Value;
+                    employee.FirstName = value;
                     break;
                 case nameof(Employee.LastName):
-                    employee.LastName = propertyChanges.Value;
+                    employee.LastName = value;
                     break;
                 case nameof(Employee.SalaryPerHour):
-                    employee.SalaryPerHour = Convert.ToDecimal(propertyChanges.Value);
+                    employee.SalaryPerHour = Convert.ToDecimal(value);
                     break;
                 default:
-                    Console.WriteLine($"Property name: {propertyChanges.Property} invalid, make sure that input is correct");
+                    Console.WriteLine($"Property name: {property} invalid, make sure that input is correct");
                     return false;
             }
+            updatedFields.Add(property);
         }
         
         Console.WriteLine($"Employee with Id: {employee.Id}, has been updated successfully.");
