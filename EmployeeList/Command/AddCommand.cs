@@ -30,8 +30,11 @@ public class AddCommand : BaseCommand
             Id          = newEmployee.Id,
             ChangesList = Changes,
         };
+        if (command.Execute()) return true;
         
-        return command.Execute();
+        // Откат новой записи
+        _repository.Delete(newEmployee.Id);
+        return true;
     }
 
     public AddCommand(IRepository<Employee> repository) : base(repository) { }

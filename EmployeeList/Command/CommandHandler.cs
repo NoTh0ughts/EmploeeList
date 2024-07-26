@@ -20,15 +20,14 @@ public static class CommandHandler
     /// <returns>Код выполнения - выхода</returns>
     public static int ExecuteAddCommand(IRepository<Employee> dataProvider, string[] inputData)
     {
-        if (inputData.Length == 0)
+        if (inputData.Length != 0)
         {
-            Console.WriteLine("Cannot add new employee - not enough data");
-            return AppConstant.ExitCodes.INVALID_ARGS;
+            var addCommand = new AddCommand(dataProvider) { Changes = inputData };
+            return addCommand.Execute() ? AppConstant.ExitCodes.OK : AppConstant.ExitCodes.CANNOT_ADD;
         }
 
-        var addCommand = new AddCommand(dataProvider) { Changes = inputData };
-        
-        return addCommand.Execute() ? AppConstant.ExitCodes.OK : AppConstant.ExitCodes.CANNOT_ADD;
+        Console.WriteLine("Cannot add new employee - not enough data");
+        return AppConstant.ExitCodes.INVALID_ARGS;
     }
 
     /// <summary>
@@ -43,18 +42,16 @@ public static class CommandHandler
     {
         // Поиск строки с полем id в аргументах
         var idEntry = inputData.FirstOrDefault(x => x.StartsWith("Id" + AppConstant.Input.ARGS_SEPARATOR));
-
         if (idEntry == null)
         {
-            Console.WriteLine("ID not found in input data.");
+            Console.WriteLine("ID not found in args data.");
             return AppConstant.ExitCodes.INVALID_ARGS;
         }
 
-        // Достаем значение id
-        var idString = idEntry.Split(AppConstant.Input.ARGS_SEPARATOR)[1].Trim();
-        if (false == int.TryParse(idString, out var id))
+        var idPair = idEntry.Split(AppConstant.Input.ARGS_SEPARATOR);
+        if (idPair.Length != 2 || false == int.TryParse(idPair[1].Trim(), out var id))
         {
-            Console.WriteLine("Invalid ID value.");
+            Console.WriteLine("Invalid or missing ID value.");
             return AppConstant.ExitCodes.INVALID_ARGS;
         }
 
@@ -87,15 +84,15 @@ public static class CommandHandler
     /// <returns>Код выполнения - выхода</returns>
     public static int ExecuteGetCommand(IRepository<Employee> dataProvider, string inputData)
     {
-        var idValue = inputData.Split(AppConstant.Input.ARGS_SEPARATOR)[1];
-        if (false == int.TryParse(idValue, out var id))
+        var idPair = inputData.Split(AppConstant.Input.ARGS_SEPARATOR);
+        if (idPair is ["Id", _] && int.TryParse(idPair[1].Trim(), out var id))
         {
-            Console.WriteLine("Invalid ID value.");
-            return AppConstant.ExitCodes.INVALID_ARGS;
+            var command = new GetCommand(dataProvider) { Id = id };
+            return command.Execute() ? AppConstant.ExitCodes.OK : AppConstant.ExitCodes.CANNOT_GET;
         }
-        
-        var command = new GetCommand(dataProvider) { Id = id };
-        return command.Execute() ? AppConstant.ExitCodes.OK : AppConstant.ExitCodes.CANNOT_GET;
+
+        Console.WriteLine("Invalid or missing ID value.");
+        return AppConstant.ExitCodes.INVALID_ARGS;
     }
     
     /// <summary>
@@ -107,15 +104,15 @@ public static class CommandHandler
     /// <returns>Код выполнения - выхода</returns>
     public static int ExecuteDeleteCommand(IRepository<Employee> dataProvider, string inputData)
     {
-        var idValue = inputData.Split(AppConstant.Input.ARGS_SEPARATOR)[1];
-        if (false == int.TryParse(idValue, out var id))
+        var idPair = inputData.Split(AppConstant.Input.ARGS_SEPARATOR);
+        if (idPair is ["Id", _] && int.TryParse(idPair[1].Trim(), out var id))
         {
-            Console.WriteLine("Invalid ID value.");
-            return AppConstant.ExitCodes.INVALID_ARGS;
+            var command = new DeleteCommand(dataProvider) { Id = id };
+            return command.Execute() ? AppConstant.ExitCodes.OK : AppConstant.ExitCodes.CANNOT_DELETE;
         }
 
-        var command = new DeleteCommand(dataProvider) { Id = id };
-        return command.Execute() ? AppConstant.ExitCodes.OK : AppConstant.ExitCodes.CANNOT_DELETE;
+        Console.WriteLine("Invalid or missing ID value.");
+        return AppConstant.ExitCodes.INVALID_ARGS;
     }
     
     /// <summary>
