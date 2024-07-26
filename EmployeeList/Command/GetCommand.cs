@@ -18,7 +18,7 @@ public class GetCommand : BaseCommand
         var employee = _repository.Get(Id);
         if (employee is null)
         {
-            Console.WriteLine("Cannot find item with Id = {Id}");
+            Console.WriteLine($"Cannot find item with Id = {Id}");
             return false;
         }
         
