@@ -24,6 +24,8 @@ public class ReflectionPropertyChanger : IEmployeePropertyChanger
     /// <returns>Обновлена ли запись</returns>
     public bool Update(Employee employee, IEnumerable<IEmployeePropertyChanger.PropertyChanges> changes)
     {
+        var updatedFields = new List<string>();
+        
         foreach (var (propertyName, propertyValue) in changes)
         {
             if (propertyName == nameof(Employee.Id))
@@ -31,7 +33,13 @@ public class ReflectionPropertyChanger : IEmployeePropertyChanger
                 Console.WriteLine("Error: Cannot update Id property.");
                 return false;
             }
-
+            
+            if (updatedFields.Contains(propertyName))
+            {
+                Console.WriteLine($"Property {propertyName} already assigned, value is not changed.");
+                continue;
+            }
+            
             var employeeType = typeof(Employee);
 
             // Получение данных по публичному полю класса
@@ -46,6 +54,7 @@ public class ReflectionPropertyChanger : IEmployeePropertyChanger
             object value = Convert.ChangeType(propertyValue, propertyInfo.PropertyType, CultureInfo.InvariantCulture);
             // Установка значения в экзэмпляр employee
             propertyInfo.SetValue(employee, value);
+            updatedFields.Add(propertyName);
         }
         
         Console.WriteLine($"Employee with Id: {employee.Id}, has been updated successfully.");
